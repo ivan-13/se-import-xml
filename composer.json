@@ -1,5 +1,6 @@
 {
     "require": {
-        "symfony/dotenv": "^4.3"
+        "symfony/dotenv": "^4.3",
+        "dkrnl/simplexmlreader": "^1.1"
     }
 }
