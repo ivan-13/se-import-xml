@@ -49,7 +49,7 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
     $reader->registerCallback("category", function($reader) use($dbh, $lang, &$parent_node_id) {
         $element = $reader->expandSimpleXml();
         $attributes = $element->attributes();
-        $sql = "INSERT INTO ". $_ENV['TABLE_PREFIX'] ."se_categories (`id`, `sport_id`, `name_" . $lang . "`) VALUES (?,?,?) ON DUPLICATE KEY UPDATE `name_" . $lang . "` = VALUES(`name_" . $lang . "`)";
+        $sql = "INSERT INTO ". $_ENV['TABLE_PREFIX'] ."se_categories (`id`, `sport_id`, `name_" . $lang . "`) VALUES (?,?,?) ON DUPLICATE KEY UPDATE `name_" . $lang . "` = VALUES(`name_" . $lang . "`), `sport_id` = VALUES(`sport_id`)";
         $values = array($attributes['id'], $parent_node_id[0], $attributes['name']);
         $stmt = $dbh->prepare($sql);
         $stmt->execute($values);
