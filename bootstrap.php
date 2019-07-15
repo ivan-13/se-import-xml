@@ -6,7 +6,7 @@ $dotenv = new Dotenv();
 $dotenv->load(__DIR__.'/.env');
 
 try {
-    $dbh = new PDO($_ENV['DB_DRIVER']. ':host=' . $_ENV['DB_SERVER'] . ';dbname=' . $_ENV['DB_NAME'], $_ENV['DB_USER'], $_ENV['DB_PASS']);
+    $dbh = new PDO($_ENV['DB_DRIVER']. ':host=' . $_ENV['DB_SERVER'] . ';dbname=' . $_ENV['DB_NAME'] . ';charset=utf8', $_ENV['DB_USER'], $_ENV['DB_PASS']);
 } catch (PDOException $e) {
     print "Error!: " . $e->getMessage() . "<br/>";
     die();
