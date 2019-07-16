@@ -13,7 +13,8 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
     $reader->open($xmlFile);
 
     // get the parent node id
-    $parent_node_id = [];
+    $sport_id = [];
+    $category_id = [];
 
     // counters for affected rows
     $count_sport_ids = 0;
@@ -22,11 +23,12 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
     $count_teams = 0;
 
     // parse and upsert sport nodes
-    $reader->registerCallback("sport", function($reader) use($dbh, $lang, &$parent_node_id, &$count_sport_ids) {
+    $reader->registerCallback("sport", function($reader) use($dbh, $lang, &$sport_id, &$count_sport_ids) {
         $element = $reader->expandSimpleXml();
         $attributes = $element->attributes();
 
-        $parent_node_id = (array) $attributes->id;
+        $sport_id = (array) $attributes->id;
+
         $sql = "INSERT INTO ". $_ENV['TABLE_PREFIX'] ."sportids (`id`, `name_" . $lang . "`) VALUES (?,?) ON DUPLICATE KEY UPDATE `name_" . $lang . "` = VALUES(`name_" . $lang . "`) ";
         $values = array($attributes['id'], $attributes['name']);
         
@@ -54,11 +56,14 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
     });
 
     // parse and upsert categories nodes
-    $reader->registerCallback("category", function($reader) use($dbh, $lang, &$parent_node_id, &$count_categories) {
+    $reader->registerCallback("category", function($reader) use($dbh, $lang, &$sport_id, &$category_id, &$count_categories) {
         $element = $reader->expandSimpleXml();
         $attributes = $element->attributes();
+        
+        $category_id = (array) $attributes->id;
+
         $sql = "INSERT INTO ". $_ENV['TABLE_PREFIX'] ."se_categories (`id`, `sport_id`, `name_" . $lang . "`) VALUES (?,?,?) ON DUPLICATE KEY UPDATE `name_" . $lang . "` = VALUES(`name_" . $lang . "`), `sport_id` = VALUES(`sport_id`)";
-        $values = array($attributes['id'], $parent_node_id[0], $attributes['name']);
+        $values = array($attributes['id'], $sport_id[0], $attributes['name']);
         $stmt = $dbh->prepare($sql);
         $stmt->execute($values);
 
@@ -66,11 +71,11 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
     });
     
     // parse and upsert tournament nodes
-    $reader->registerCallback("tournament", function($reader) use($dbh, $lang, &$count_tournaments) {
+    $reader->registerCallback("tournament", function($reader) use($dbh, $lang, &$category_id, &$count_tournaments) {
         $element = $reader->expandSimpleXml();
         $attributes = $element->attributes();
-        $sql = "INSERT INTO ". $_ENV['TABLE_PREFIX'] ."se_tournaments (`id`, `unique_id`, `category_id`, `name_" . $lang . "`) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE `name_" . $lang . "` = VALUES(`name_" . $lang . "`) ";
-        $values = array($attributes['id'], $attributes['uniqueid'], 1, $attributes['name']);
+        $sql = "INSERT INTO ". $_ENV['TABLE_PREFIX'] ."se_tournaments (`id`, `unique_id`, `category_id`, `name_" . $lang . "`) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE `name_" . $lang . "` = VALUES(`name_" . $lang . "`), `category_id` = VALUES(`category_id`), `unique_id` = VALUES(`unique_id`)";
+        $values = array($attributes['id'], $attributes['uniqueid'], $category_id[0], $attributes['name']);
         $stmt = $dbh->prepare($sql);
         $stmt->execute($values);
 
