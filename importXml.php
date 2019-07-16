@@ -82,6 +82,18 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
         if($stmt->rowCount() > 0) $count_tournaments++; 
     });
 
+    // parse and upsert team nodes
+    $reader->registerCallback("team", function($reader) use($dbh, $lang, &$count_teams) {
+        $element = $reader->expandSimpleXml();
+        $attributes = $element->attributes();
+        $sql = "INSERT INTO ". $_ENV['TABLE_PREFIX'] ."se_teams (`id`,`name_" . $lang . "`) VALUES (?,?) ON DUPLICATE KEY UPDATE `name_" . $lang . "` = VALUES(`name_" . $lang . "`)";
+        $values = array($attributes['superId'], $attributes['name']);
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute($values);
+
+        if($stmt->rowCount() > 0) $count_teams++; 
+    });
+
     while($reader->read()){
         $reader->parse();
     }
@@ -91,6 +103,7 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
     print("Parsed $xmlFile file, upserted $count_sport_ids rows in sportids table.\n");
     print("Parsed $xmlFile file, upserted $count_categories rows in se_categories table.\n");
     print("Parsed $xmlFile file, upserted $count_tournaments rows in se_tournaments table.\n");
+    print("Parsed $xmlFile file, upserted $count_teams rows in se_teams table.\n");
 }
 
 function get_lang($filename) {
