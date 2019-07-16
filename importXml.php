@@ -31,25 +31,8 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
 
         $sql = "INSERT INTO ". $_ENV['TABLE_PREFIX'] ."sportids (`id`, `name_" . $lang . "`) VALUES (?,?) ON DUPLICATE KEY UPDATE `name_" . $lang . "` = VALUES(`name_" . $lang . "`) ";
         $values = array($attributes['id'], $attributes['name']);
-        
-        // $sql = "
-        //         UPDATE ". $_ENV['TABLE_PREFIX'] ."sportids
-        //         SET name_" . $lang . " = :name,
-        //         WHERE id = :id
-        //         ";
-        
-        // $values = [
-        //     ':name' => $attributes['name'],
-        //     ':id'   => $attributes['id']
-        // ];
-        
         $stmt = $dbh->prepare($sql);
 
-        
-        if (!$stmt) {
-            echo "\nPDO::errorInfo():\n";
-            print_r($dbh->errorInfo());
-        }
         $stmt->execute($values);
 
         if($stmt->rowCount() > 0) $count_sport_ids++; 
