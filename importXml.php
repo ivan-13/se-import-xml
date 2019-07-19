@@ -2,15 +2,14 @@
 include "bootstrap.php";
 
 foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
-    $xml = XMLReader::open($xmlFile);
-    $xml->setParserProperty(XMLReader::VALIDATE, true);
-    if(!$xml->isValid()) continue;
-
-    // check for language in file name
+    
+    // check for language in file name, if not specified, continue
     if(false == $lang = get_lang($xmlFile)) continue;
-
+    
     $reader = new \SimpleXMLReader;
     $reader->open($xmlFile);
+    // $reader->setParserProperty(XMLReader::VALIDATE, true);
+    // if(!$reader->isValid()) continue;
 
     // get the parent node id
     $sport_id = [];
