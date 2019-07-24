@@ -14,22 +14,23 @@ foreach (glob($_ENV['XMLDIR_PATH'] . "/*.xml") as $xmlFile) {
 
     // parse and upsert team ranks
     $reader->registerCallback($_ENV['TABLE_PREFIX'] . "sportids", function($reader) use($dbh, &$count) {
-        $element = $reader->expandSimpleXml();
-        if(!isset($element->DATA_RECORD->id)) exit('no DATA_RECORD specified in XML, script aborted');
+        $elements = $reader->expandSimpleXml();
+        if(!isset($elements->DATA_RECORD->id)) exit('no DATA_RECORD specified in XML, script aborted');
+        foreach ($elements as $element){
+            $values = [
+                ":id"   => $element->id,
+                ":name_ru" => $element->name_ru
+            ];
+        
+            $sql = "UPDATE ". $_ENV['TABLE_PREFIX'] . "sportids SET name_ru = :name_ru WHERE id = :id";
+            $stmt = $dbh->prepare($sql);
+    
+            $stmt->execute($values);
+    
+            if($stmt->rowCount() > 0) $count++; 
+    
+        }
 
-        $values = [
-            ":id"   => $element->DATA_RECORD->id,
-            ":name_ru" => $element->DATA_RECORD->name_ru
-        ];
-
-        print_r($element);
-
-        $sql = "UPDATE ". $_ENV['TABLE_PREFIX'] . "sportids SET name_ru = :name_ru WHERE id = :id";
-        $stmt = $dbh->prepare($sql);
-
-        $stmt->execute($values);
-
-        if($stmt->rowCount() > 0) $count++; 
     });
 
     while($reader->read()){
