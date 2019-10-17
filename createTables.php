@@ -80,3 +80,10 @@ $dbh->query("
     INDEX (name_it),
     INDEX (name_fr)
 )");
+
+$dbh->query("
+    CREATE TABLE IF NOT EXISTS ". $_ENV['TABLE_PREFIX'] ."se_tournaments_teams(
+    tournament_id INT(11),
+    team_id INT(11),
+    PRIMARY KEY (tournament_id, team_id)
+)");
