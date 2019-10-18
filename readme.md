@@ -1,4 +1,4 @@
-# Import XML betradar sports and leagues PHP script
+# Import XML PHP script
 
 ## Installation
 
